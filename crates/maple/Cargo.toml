@@ -1,0 +1,12 @@
+[package]
+name = "maple"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+
+[dependencies]
+clap = { workspace = true }
+tokio = { workspace = true }

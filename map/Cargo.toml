@@ -1,0 +1,15 @@
+[package]
+name = "map"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+libp2p = { workspace = true }
+futures = { workspace = true }
+ual = { workspace = true }
