@@ -1,6 +1,15 @@
 [package]
 name = "agent"
-version = "0.1.0"
-edition = "2024"
+description = "Maple AI Agent implementations for task execution"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
 
 [dependencies]
+tokio = { workspace = true }
+serde = { workspace = true }
+ual = { workspace = true }
+async-trait = "0.1"  # Stable version for async traits

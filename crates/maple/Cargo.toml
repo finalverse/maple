@@ -1,5 +1,6 @@
 [package]
 name = "maple"
+description = "Maple CLI for interacting with MAPLE ecosystem"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true

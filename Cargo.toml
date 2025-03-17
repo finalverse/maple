@@ -29,6 +29,7 @@ homepage = "https://mapleai.org"
 # Internal crate dependencies.
 ual = { path = "ual" }
 map = { path = "map" }
+agent = { path = "agent" }
 
 # External crate dependencies.
 serde = { version = "1.0", features = ["derive"] }

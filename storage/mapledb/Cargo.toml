@@ -1,6 +1,12 @@
 [package]
 name = "mapledb"
-version = "0.1.0"
-edition = "2024"
+description = "Maple AI ecosystem storage"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
 
 [dependencies]
+serde = { workspace = true }

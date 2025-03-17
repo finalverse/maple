@@ -1,5 +1,6 @@
 [package]
 name = "maple-node"
+description = "Maple Node Server for distributed and enterprise modes"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true
@@ -9,10 +10,10 @@ homepage.workspace = true
 
 [dependencies]
 tokio = { workspace = true }
-# yamux = { workspace = true }
 clap = { workspace = true }
 libp2p = { workspace = true }
 futures = { workspace = true }
 serde_json = { workspace = true }
 ual = { workspace = true }
 map = { workspace = true }
+agent = { workspace = true }
