@@ -3,6 +3,7 @@ resolver = "2"  # Use stable dependency resolver
 members = [
     "api",
     "maple-core",
+    "maple-core/package",
     "maple-node",
     "config",
     "sdk",
@@ -30,6 +31,8 @@ homepage = "https://mapleai.org"
 ual = { path = "ual" }
 map = { path = "map" }
 agent = { path = "agent" }
+maple-package = { path = "maple-core/package"}
+mapledb = { path = "storage/mapledb"}
 
 # External crate dependencies.
 serde = { version = "1.0", features = ["derive"] }

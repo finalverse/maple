@@ -13,7 +13,12 @@ tokio = { workspace = true }
 clap = { workspace = true }
 libp2p = { workspace = true }
 futures = { workspace = true }
+serde = { workspace = true }  # Added for serialization in Enterprise Mode
 serde_json = { workspace = true }
+
+# internal
 ual = { workspace = true }
 map = { workspace = true }
 agent = { workspace = true }
+mapledb = { workspace = true }
+maple-package = { workspace = true }

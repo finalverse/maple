@@ -37,6 +37,8 @@ enum NodeCommands {
     },
     /// Send a UAL command to the node
     Send { ual: String },
+    Import { path: String }, // New command
+    Export { name: String, path: String }, // New command
 }
 
 #[tokio::main]
@@ -77,6 +79,14 @@ async fn main() {
                 if !status.success() {
                     eprintln!("Failed to send UAL");
                 }
+            }
+            NodeCommands::Import { path } => {
+                println!("Importing package from {}", path);
+                // TODO: Integrate with running node (future step)
+            }
+            NodeCommands::Export { name, path } => {
+                println!("Exporting package {} to {}", name, path);
+                // TODO: Integrate with running node (future step)
             }
         },
     }

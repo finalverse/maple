@@ -1,6 +1,6 @@
 [package]
-name = "mapledb"
-description = "Maple AI ecosystem storage with persistence"
+name = "maple-package"
+description = "Maple package management for pre-defined business logic"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true
@@ -10,4 +10,5 @@ homepage.workspace = true
 
 [dependencies]
 serde = { workspace = true }
-sqlite = "0.36"  # Stable SQLite crate
+serde_json = { workspace = true }
+ual = { workspace = true }
