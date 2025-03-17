@@ -3,17 +3,20 @@
 // Official Website: https://mapleai.org
 // GitHub: https://github.com/finalverse/mapleai.git
 
-use ual::UALStatement;
+use ual::{UALStatement, parse_ual};
 use agent::{AgentRegistry, MapleAgent};
+use maple_package::MaplePackage;
 
 pub struct MapleSDK {
     agents: AgentRegistry,
+    packages: Vec<MaplePackage>,
 }
 
 impl MapleSDK {
     pub fn new() -> Self {
         MapleSDK {
             agents: AgentRegistry::new(),
+            packages: Vec::new(),
         }
     }
 
@@ -23,5 +26,24 @@ impl MapleSDK {
 
     pub async fn execute_ual(&self, stmt: UALStatement) -> Result<(), String> {
         self.agents.execute(&stmt).await
+    }
+
+    // Add a package to the SDK
+    pub fn add_package(&mut self, pkg: MaplePackage) {
+        self.packages.push(pkg);
+    }
+
+    // Execute a named package
+    pub async fn execute_package(&self, name: &str) -> Result<(), String> {
+        if let Some(pkg) = self.packages.iter().find(|p| p.name == name) {
+            for ual_cmd in &pkg.workflow {
+                if let Ok(stmt) = parse_ual(ual_cmd) {
+                    self.execute_ual(stmt).await?;
+                }
+            }
+            Ok(())
+        } else {
+            Err(format!("Package '{}' not found", name))
+        }
     }
 }

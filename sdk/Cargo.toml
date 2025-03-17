@@ -12,3 +12,4 @@ homepage.workspace = true
 tokio = { workspace = true }
 ual = { workspace = true }
 agent = { workspace = true }
+maple-package = { workspace = true }

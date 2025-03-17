@@ -1749,7 +1749,9 @@ name = "maple"
 version = "0.1.0"
 dependencies = [
  "clap",
+ "futures",
  "tokio",
+ "tokio-util",
 ]
 
 [[package]]
@@ -1773,6 +1775,7 @@ dependencies = [
  "serde",
  "serde_json",
  "tokio",
+ "tokio-util",
  "ual",
 ]
 
@@ -2556,6 +2559,7 @@ name = "sdk"
 version = "0.1.0"
 dependencies = [
  "agent",
+ "maple-package",
  "tokio",
  "ual",
 ]
