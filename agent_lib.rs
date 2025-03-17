@@ -30,11 +30,12 @@ impl AgentRegistry {
         }
     }
 
-    // Register an agent with a unique ID and persist its definition in the database asynchronously
-    pub async fn register(&mut self, id: String, agent: impl MapleAgent + 'static) {
+    // Register an agent with a unique ID and persist its definition in the database
+    /// Register an agent with a unique ID and persist its definition in the database
+    pub fn register(&mut self, id: String, agent: impl MapleAgent + 'static) {
         self.agents.insert(id.clone(), Box::new(agent));
-        // Await the async define_agent call
-        if let Err(e) = self.db.define_agent(&id, "Generic", "Generic agent").await {
+        // Proper error handling for DB operation
+        if let Err(e) = self.db.define_agent(&id, "Generic", "Generic agent") {
             eprintln!("Failed to register agent {} in DB: {}", id, e);
         }
     }
@@ -60,7 +61,7 @@ impl MapleAgent for SystemCoordinator {
             "EXEC subtask1 agent1".to_string(),
             "EXEC subtask2 product_manager".to_string(),
         ];
-        db.log_event(&format!("SystemCoordinator generated sub-tasks: {:?}", sub_tasks)).await?;
+        db.log_event(&format!("SystemCoordinator generated sub-tasks: {:?}", sub_tasks))?;
         Ok(())
     }
 }
@@ -71,7 +72,7 @@ pub struct ProductManager;
 impl MapleAgent for ProductManager {
     async fn execute(&self, stmt: &UALStatement, db: &MapleDB) -> Result<(), MapleDBError> {
         println!("ProductManager defining product: {:?}", stmt);
-        db.log_event(&format!("ProductManager executed: {:?}", stmt)).await?;
+        db.log_event(&format!("ProductManager executed: {:?}", stmt))?;
         Ok(())
     }
 }
@@ -81,7 +82,7 @@ pub struct Architect;
 impl MapleAgent for Architect {
     async fn execute(&self, stmt: &UALStatement, db: &MapleDB) -> Result<(), MapleDBError> {
         println!("Architect defining requirements: {:?}", stmt);
-        db.log_event(&format!("Architect executed: {:?}", stmt)).await?;
+        db.log_event(&format!("Architect executed: {:?}", stmt))?;
         Ok(())
     }
 }
@@ -91,7 +92,7 @@ pub struct ProjectManager;
 impl MapleAgent for ProjectManager {
     async fn execute(&self, stmt: &UALStatement, db: &MapleDB) -> Result<(), MapleDBError> {
         println!("ProjectManager planning: {:?}", stmt);
-        db.log_event(&format!("ProjectManager executed: {:?}", stmt)).await?;
+        db.log_event(&format!("ProjectManager executed: {:?}", stmt))?;
         Ok(())
     }
 }
@@ -101,7 +102,7 @@ pub struct SystemEngineer;
 impl MapleAgent for SystemEngineer {
     async fn execute(&self, stmt: &UALStatement, db: &MapleDB) -> Result<(), MapleDBError> {
         println!("SystemEngineer managing infra/release: {:?}", stmt);
-        db.log_event(&format!("SystemEngineer executed: {:?}", stmt)).await?;
+        db.log_event(&format!("SystemEngineer executed: {:?}", stmt))?;
         Ok(())
     }
 }
@@ -111,7 +112,7 @@ pub struct AppDeveloper;
 impl MapleAgent for AppDeveloper {
     async fn execute(&self, stmt: &UALStatement, db: &MapleDB) -> Result<(), MapleDBError> {
         println!("AppDeveloper developing app: {:?}", stmt);
-        db.log_event(&format!("AppDeveloper executed: {:?}", stmt)).await?;
+        db.log_event(&format!("AppDeveloper executed: {:?}", stmt))?;
         Ok(())
     }
 }
@@ -121,7 +122,7 @@ pub struct QAEngineer;
 impl MapleAgent for QAEngineer {
     async fn execute(&self, stmt: &UALStatement, db: &MapleDB) -> Result<(), MapleDBError> {
         println!("QAEngineer testing app: {:?}", stmt);
-        db.log_event(&format!("QAEngineer executed: {:?}", stmt)).await?;
+        db.log_event(&format!("QAEngineer executed: {:?}", stmt))?;
         Ok(())
     }
 }
@@ -131,7 +132,7 @@ pub struct SimpleAgent;
 impl MapleAgent for SimpleAgent {
     async fn execute(&self, stmt: &UALStatement, db: &MapleDB) -> Result<(), MapleDBError> {
         println!("SimpleAgent executing: {:?}", stmt);
-        db.log_event(&format!("SimpleAgent executed: {:?}", stmt)).await?;
+        db.log_event(&format!("SimpleAgent executed: {:?}", stmt))?;
         Ok(())
     }
 }

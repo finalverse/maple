@@ -17,7 +17,7 @@ pub struct DistributedNode {
 }
 
 impl DistributedNode {
-    pub fn new() -> Self {
+    pub async fn new() -> Self {
         let local_key = identity::Keypair::generate_ed25519();
         let local_peer_id = PeerId::from(local_key.public());
         println!("Local Peer ID: {}", local_peer_id);

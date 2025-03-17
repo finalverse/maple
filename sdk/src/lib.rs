@@ -6,6 +6,7 @@
 use ual::{UALStatement, parse_ual};
 use agent::{AgentRegistry, MapleAgent};
 use maple_package::MaplePackage;
+use mapledb::MapleDB;
 
 pub struct MapleSDK {
     agents: AgentRegistry,
@@ -14,8 +15,10 @@ pub struct MapleSDK {
 
 impl MapleSDK {
     pub fn new() -> Self {
+        // Initialize MapleDB for the AgentRegistry
+        let db = MapleDB::new("maple_sdk.db").expect("Failed to initialize DB");
         MapleSDK {
-            agents: AgentRegistry::new(),
+            agents: AgentRegistry::new(db), // Provide the required MapleDB instance
             packages: Vec::new(),
         }
     }

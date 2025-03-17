@@ -18,28 +18,28 @@ pub struct EnterpriseNode {
     agents: AgentRegistry,
     package_mgr: PackageManager,
     current_package: Option<MaplePackage>,
-    db: MapleDB,                // Use Rc to share ownership
+    db: Rc<MapleDB>,                // Use Rc to share ownership
     current_project: Option<i64>,   // Added for project management
 }
 
 impl EnterpriseNode {
     /// Initialize a new EnterpriseNode with default package manager
-    pub async fn new() -> Self {
+    pub fn new() -> Self {
         // Initialize SQLite database for persistence
-        let db = MapleDB::new("maple.db").expect("Failed to initialize DB");
-        
-        let mut agents = AgentRegistry::new(db.clone());
+        let db = Rc::new(MapleDB::new("maple.db").expect("Failed to initialize DB"));
+
+        let mut agents = AgentRegistry::new(Rc::clone(&db));
 
         // Register a default agent with a simple implementation
-        agents.register("agent1".to_string(), agent::SimpleAgent).await;
+        agents.register("agent1".to_string(), agent::SimpleAgent);
 
-        agents.register("system_coordinator".to_string(), agent::SystemCoordinator).await;
-        agents.register("product_manager".to_string(), agent::ProductManager).await;
-        agents.register("architect".to_string(), agent::Architect).await;
-        agents.register("project_manager".to_string(), agent::ProjectManager).await;
-        agents.register("system_engineer".to_string(), agent::SystemEngineer).await;
-        agents.register("app_developer".to_string(), agent::AppDeveloper).await;
-        agents.register("qa_engineer".to_string(), agent::QAEngineer).await;
+        agents.register("system_coordinator".to_string(), agent::SystemCoordinator);
+        agents.register("product_manager".to_string(), agent::ProductManager);
+        agents.register("architect".to_string(), agent::Architect);
+        agents.register("project_manager".to_string(), agent::ProjectManager);
+        agents.register("system_engineer".to_string(), agent::SystemEngineer);
+        agents.register("app_developer".to_string(), agent::AppDeveloper);
+        agents.register("qa_engineer".to_string(), agent::QAEngineer);
 
         let mut package_mgr = PackageManager::new();
         // Add default package using a public method
@@ -89,7 +89,7 @@ impl EnterpriseNode {
         let msg = create_map_message(stmt, "maple-node");
         println!("Enterprise Mode UAL: {:?}", msg);
         self.agents.execute(&msg.payload).await?;
-        self.db.log_event(&format!("{:?}", msg))?;
+        self.db.log_event(&format!("{:?}", msg)).map_err(|e| e.to_string())?;
         Ok(())
     }
 
@@ -133,7 +133,7 @@ impl EnterpriseNode {
         let parts: Vec<&str> = cmd.split_whitespace().collect();
         let user_id = "admin"; // Hardcoded for now, replace with auth later
         let role = self.db.get_user_role(user_id).unwrap_or(None).unwrap_or("user".to_string());
-
+        
         match *parts.get(0).unwrap_or(&"") {
             "define_agent" => {
                 if role != "admin" {
@@ -144,7 +144,7 @@ impl EnterpriseNode {
                     let id = parts[2];
                     let role = parts.get(3).unwrap_or(&"Generic");
                     let desc = parts[4..].join(" ");
-                    self.db.define_agent(id, role, &desc)?;
+                    self.db.define_agent(id, role, &desc).map_err(|e| e.to_string())?;
                     let _ = framed.send(format!("Agent '{}' defined", id)).await;
                 } else {
                     let _ = framed.send("Syntax: define_agent AGENT <id> <role> <description>").await;

@@ -2564,6 +2564,7 @@ version = "0.1.0"
 dependencies = [
  "agent",
  "maple-package",
+ "mapledb",
  "tokio",
  "ual",
 ]
