@@ -57,6 +57,7 @@ name = "agent"
 version = "0.1.0"
 dependencies = [
  "async-trait",
+ "mapledb",
  "serde",
  "tokio",
  "ual",
@@ -1792,8 +1793,11 @@ dependencies = [
 name = "mapledb"
 version = "0.1.0"
 dependencies = [
+ "futures",
  "serde",
  "sqlite",
+ "thiserror 1.0.69",
+ "tokio",
 ]
 
 [[package]]

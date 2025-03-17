@@ -13,3 +13,5 @@ tokio = { workspace = true }
 serde = { workspace = true }
 ual = { workspace = true }
 async-trait = "0.1"  # Stable version for async traits
+
+mapledb = { workspace = true }

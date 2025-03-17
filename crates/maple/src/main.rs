@@ -45,6 +45,10 @@ enum NodeCommands {
     Import { path: String },
     /// Export a package to a file (placeholder workflow)
     Export { name: String, path: String },
+    CreateProject { name: String, description: String },
+    ListProjects,
+    SwitchProject { id: String },
+    DefineAgent { id: String, role: String, description: String },
 }
 
 #[tokio::main]
@@ -114,6 +118,38 @@ async fn main() {
                     .await
                     .unwrap();
                 // Print the node’s response
+                if let Some(Ok(response)) = framed.next().await {
+                    println!("{}", response);
+                }
+            }
+            NodeCommands::CreateProject { name, description } => {
+                let mut stream = TcpStream::connect("127.0.0.1:8080").await.expect("Node not running");
+                let mut framed = Framed::new(stream, LinesCodec::new());
+                framed.send(format!("create_project {} {}", name, description)).await.unwrap();
+                if let Some(Ok(response)) = framed.next().await {
+                    println!("{}", response);
+                }
+            }
+            NodeCommands::ListProjects => {
+                let mut stream = TcpStream::connect("127.0.0.1:8080").await.expect("Node not running");
+                let mut framed = Framed::new(stream, LinesCodec::new());
+                framed.send("list_projects").await.unwrap();
+                if let Some(Ok(response)) = framed.next().await {
+                    println!("{}", response);
+                }
+            }
+            NodeCommands::SwitchProject { id } => {
+                let mut stream = TcpStream::connect("127.0.0.1:8080").await.expect("Node not running");
+                let mut framed = Framed::new(stream, LinesCodec::new());
+                framed.send(format!("switch_project {}", id)).await.unwrap();
+                if let Some(Ok(response)) = framed.next().await {
+                    println!("{}", response);
+                }
+            }
+            NodeCommands::DefineAgent { id, role, description } => {
+                let mut stream = TcpStream::connect("127.0.0.1:8080").await.expect("Node not running");
+                let mut framed = Framed::new(stream, LinesCodec::new());
+                framed.send(format!("define_agent AGENT {} {} {}", id, role, description)).await.unwrap();
                 if let Some(Ok(response)) = framed.next().await {
                     println!("{}", response);
                 }
