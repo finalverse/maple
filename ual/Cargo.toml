@@ -1,11 +1,11 @@
 [package]
-name = "ual"
-version.workspace = true
-edition.workspace = true
-authors.workspace = true
-license.workspace = true
-repository.workspace = true
-homepage.workspace = true
+name = "maple-ual"
+version = "0.1.0"
+edition = "2021"
+description = "Universal Agent Language (UAL) for multi-mode agent communication"
 
 [dependencies]
-serde = { workspace = true }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0" # For JSON mode
+prost = "0.12" # For gRPC-like binary serialization
+tokio = { version = "1.0", features = ["full"] }

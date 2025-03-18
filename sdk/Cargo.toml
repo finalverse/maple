@@ -10,6 +10,6 @@ homepage.workspace = true
 
 [dependencies]
 tokio = { workspace = true }
-ual = { workspace = true }
-agents = { workspace = true }
+maple-ual = { workspace = true }
+maple-agents = { workspace = true }
 mapledb = { workspace = true }

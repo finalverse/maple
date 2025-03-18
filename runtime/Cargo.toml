@@ -11,8 +11,8 @@ homepage.workspace = true
 [dependencies]
 
 # internal
-ual = { workspace = true }
-map = { workspace = true }
+maple-ual = { workspace = true }
+maple-map = { workspace = true }
 mapledb = { workspace = true }
 
 # external

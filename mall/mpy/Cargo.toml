@@ -1,6 +1,12 @@
 [package]
-name = "mpy"
+name = "maple-mpy"
 version = "0.1.0"
-edition = "2024"
+edition = "2021"
+description = "Python agent runtime for MALL"
 
 [dependencies]
+maple-ual = { path = "../../ual" }
+pyo3 = { version = "0.20", features = ["auto-initialize"] } # For Python integration
+serde = { version = "1.0", features = ["derive"] }
+tokio = { version = "1.0", features = ["full"] }
+serde_json = "1.0.140"

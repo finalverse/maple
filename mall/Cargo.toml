@@ -1,10 +1,12 @@
 [package]
-name = "mall"
-version.workspace = true
-edition.workspace = true
-authors.workspace = true
-license.workspace = true
-repository.workspace = true
-homepage.workspace = true
+name = "maple-mall"
+version = "0.1.0"
+edition = "2021"
+description = "Maple Agent Learning Lab (MALL) for agent evolution"
 
 [dependencies]
+maple-mpy = { workspace = true }
+maple-ual = { workspace = true }
+serde = { version = "1.0", features = ["derive"] }
+tokio = { version = "1.0", features = ["full"] }
+serde_json = "1.0.140"
