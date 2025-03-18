@@ -106,6 +106,15 @@ impl MapProtocol {
             .await?;
         Ok(())
     }
+
+    /// Broadcasts a .map file to all peers
+    pub async fn broadcast_map_file(&self, path: &str) -> Result<(), Box<dyn Error>> {
+        let mut file = tokio::fs::File::open(path).await?;
+        let mut buffer = Vec::new();
+        file.read_to_end(&mut buffer).await?;
+        self.broadcast(String::from_utf8_lossy(&buffer).to_string()).await?;
+        Ok(())
+    }
 }
 
 #[cfg(test)]

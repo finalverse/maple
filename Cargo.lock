@@ -1967,8 +1967,11 @@ dependencies = [
 name = "maple-agents"
 version = "0.1.0"
 dependencies = [
+ "maple-map",
  "maple-ual",
+ "mapledb",
  "serde",
+ "serde_json",
  "tokio",
 ]
 

@@ -14,7 +14,6 @@ impl PgStorage {
     pub async fn new() -> Result<Self, SqlxError> {
         let url = env::var("DATABASE_URL").unwrap_or_else(|_| "postgres://localhost/maple".to_string());
         let pool = Pool::connect(&url).await?;
-        // Create a table if it doesn't exist
         sqlx::query(
             "CREATE TABLE IF NOT EXISTS agents (
                 id TEXT PRIMARY KEY,

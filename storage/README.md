@@ -15,6 +15,9 @@ let db = MapleDb::new("maple_data").unwrap();
 db.store("agent1", b"data").unwrap();
 ```
 
+## Notes
+- Supports `.map` files for agent DNA storage via `maple-agents`.
+
 ## Build
 ```bash
 cargo build --release -p mapledb
