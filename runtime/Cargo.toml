@@ -1,0 +1,28 @@
+[package]
+name = "maple-runtime"
+description = "Maple Node Server runtime for distributed and enterprise modes"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+
+[dependencies]
+
+# internal
+ual = { workspace = true }
+map = { workspace = true }
+mapledb = { workspace = true }
+
+# external
+tokio = { workspace = true }
+clap = { workspace = true }
+libp2p = { workspace = true }
+futures = { workspace = true }
+serde = { workspace = true }                        # Added for serialization in Enterprise Mode
+serde_json = { workspace = true }
+
+tokio-util = { version = "0.7.14", features = ["codec"] }
+
+

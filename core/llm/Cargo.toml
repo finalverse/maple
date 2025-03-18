@@ -1,0 +1,9 @@
+[package]
+name = "maple-llm"
+version = "0.1.0"
+edition = "2021"
+description = "External LLM integrations for MAPLE"
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+# Add external LLM crates as needed (e.g., llama-cpp-rs)

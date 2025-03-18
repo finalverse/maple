@@ -1,6 +1,6 @@
 [package]
-name = "sdk"
-description = "MapleAI SDK for developers"
+name = "maple-cli"
+description = "Maple CLI for interacting with MAPLE ecosystem"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true
@@ -9,7 +9,7 @@ repository.workspace = true
 homepage.workspace = true
 
 [dependencies]
+clap = { workspace = true }
 tokio = { workspace = true }
-ual = { workspace = true }
-agents = { workspace = true }
-mapledb = { workspace = true }
+tokio-util = { version = "0.7.14", features = ["codec"] }
+futures = { workspace = true }

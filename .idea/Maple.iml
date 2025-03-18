@@ -2,21 +2,27 @@
 <module type="EMPTY_MODULE" version="4">
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$">
-      <sourceFolder url="file://$MODULE_DIR$/agent/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/api/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/config/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/crates/maple/src" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/llm/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/map/src" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/maple-core/src" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/maple-node/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/sdk/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/storage/mapledb/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/storage/postgresql/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/storage/vectordb/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/ual/src" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/maple-core/package/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/agents/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/cli/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/core/llm/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/core/maple/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/core/package/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/core/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/mall/mpy/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/mall/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/mrs/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/runtime/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/utils/src" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
     </content>
     <orderEntry type="inheritedJdk" />

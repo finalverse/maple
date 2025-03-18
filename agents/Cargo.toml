@@ -1,6 +1,6 @@
 [package]
-name = "sdk"
-description = "MapleAI SDK for developers"
+name = "agents"
+description = "Maple AI Agent implementations for task execution"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true
@@ -10,6 +10,8 @@ homepage.workspace = true
 
 [dependencies]
 tokio = { workspace = true }
+serde = { workspace = true }
 ual = { workspace = true }
-agents = { workspace = true }
+async-trait = "0.1"  # Stable version for async traits
+
 mapledb = { workspace = true }

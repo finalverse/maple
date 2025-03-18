@@ -1,0 +1,12 @@
+[package]
+name = "maple-mrs"
+version = "0.1.0"
+edition = "2021"
+description = "MAPLE Registry Service for agent registration and DID management"
+
+[dependencies]
+maple-map = { path = "../map" }
+maple-agents = { path = "../agents" }
+serde = { version = "1.0", features = ["derive"] }
+tokio = { version = "1.0", features = ["full"] }
+uuid = { version = "1.0", features = ["v4"] } # For generating DIDs

@@ -1,20 +1,30 @@
+[package]
+name = "maple"
+version = "0.1.0"
+edition = "2021"
+description = "A decentralized multi-agent protocol learning environment"
+
 [workspace]
 resolver = "2"  # Use stable dependency resolver
 members = [
+    "agents",
     "api",
-    "maple-core",
-    "maple-core/package",
-    "maple-node",
+    "cli",
     "config",
-    "sdk",
-    "agent",
-    "crates/maple",
+    "core",
+    "core/llm",
+    "core/maple",
+    "mall",
+    "mall/mpy",
     "map",
-    "ual",
-    "llm",
+    "mrs",
+    "runtime",
+    "sdk",
     "storage/mapledb",
     "storage/postgresql",
     "storage/vectordb",
+    "ual",
+    "utils",
 ]
 exclude = []  # Add if needed for external crates
 
@@ -30,8 +40,7 @@ homepage = "https://mapleai.org"
 # Internal crate dependencies.
 ual = { path = "ual" }
 map = { path = "map" }
-agent = { path = "agent" }
-maple-package = { path = "maple-core/package"}
+agents = { path = "agents" }
 mapledb = { path = "storage/mapledb"}
 
 # External crate dependencies.

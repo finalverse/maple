@@ -51,7 +51,7 @@ pub struct Project {
     pub status: String, // e.g., "active", "completed"
 }
 
-// Agent definition structure for agent management
+// Agent definition structure for agents management
 #[derive(Serialize, Deserialize, Debug)]
 pub struct AgentDef {
     pub id: String,
@@ -211,7 +211,7 @@ impl MapleDB {
 
     // Agent Management
 
-    /// Define or update an agent asynchronously
+    /// Define or update an agents asynchronously
     pub async fn define_agent(&self, id: &str, role: &str, description: &str) -> Result<()> {
         let mut conn = self.conn.lock().await;
         let mut stmt = try_sql!(conn.prepare(
@@ -239,7 +239,7 @@ impl MapleDB {
         Ok(agents)
     }
 
-    /// Delete an agent by ID asynchronously
+    /// Delete an agents by ID asynchronously
     pub async fn delete_agent(&self, id: &str) -> Result<()> {
         let mut conn = self.conn.lock().await;
         let mut stmt = try_sql!(conn.prepare("DELETE FROM agents WHERE id = ?"));
@@ -247,7 +247,7 @@ impl MapleDB {
         try_sql!(stmt.next());
         let changes = conn.change_count();
         if changes == 0 {
-            return Err(MapleDBError::String(format!("No agent found with id {}", id)));
+            return Err(MapleDBError::String(format!("No agents found with id {}", id)));
         }
         Ok(())
     }
@@ -301,7 +301,7 @@ mod tests {
     #[tokio::test]
     async fn test_agent_crud() {
         let db = MapleDB::new(":memory:").unwrap();
-        db.define_agent("agent1", "tester", "Test agent").await.unwrap();
+        db.define_agent("agent1", "tester", "Test agents").await.unwrap();
 
         let agents = db.list_agents().await.unwrap();
         assert_eq!(agents.len(), 1);

@@ -1,10 +1,11 @@
 [package]
-name = "maple-map"
+name = "maple-core"
 version = "0.1.0"
 edition = "2021"
-description = "Multi-Agent Protocol (MAP) for decentralized P2P messaging"
+description = "Core governance and LLM/AGI integration for MAPLE"
 
 [dependencies]
-libp2p = "0.53" # For P2P networking
+maple-llm = { path = "llm" }
+maple-maple = { path = "maple" }
 serde = { version = "1.0", features = ["derive"] }
 tokio = { version = "1.0", features = ["full"] }

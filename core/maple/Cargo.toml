@@ -1,0 +1,8 @@
+[package]
+name = "maple-maple"
+version = "0.1.0"
+edition = "2021"
+description = "Internal Maple LLM for governance"
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
