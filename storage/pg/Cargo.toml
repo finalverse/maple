@@ -1,8 +1,8 @@
 [package]
-name = "maple-vectordb"
+name = "maple-pg"
 version = "0.1.0"
 edition = "2021"
-description = "Vector database backend for agent memory and embeddings"
+description = "PostgreSQL backend for structured data storage"
 authors = ["Finalverse Inc. <maple@finalverse.com>"]
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/finalverse/mapleai.git"
@@ -11,4 +11,5 @@ homepage = "https://mapleai.org"
 [dependencies]
 serde = { workspace = true }
 tokio = { workspace = true }
-# Placeholder for a vector DB (e.g., Qdrant or Milvus client)
+sqlx = { version = "0.7", features = ["runtime-tokio", "postgres"] }
+serde_json = "1.0.140"

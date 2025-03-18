@@ -1,137 +1,94 @@
-// agents/src/lib.rs
-// Copyright © 2025 Finalverse Inc. <maple@finalverse.com>
-// Official Website: https://mapleai.org
-// GitHub: https://github.com/finalverse/mapleai.git
+// Agent implementations for the MAPLE ecosystem
+// © 2025 Finalverse Inc. All rights reserved.
 
-use async_trait::async_trait;
-use ual::UALStatement;
-use mapledb::{MapleDB, MapleDBError};
-use std::collections::HashMap;
+use maple_ual::{UalMessage, Mode};
+use serde::{Deserialize, Serialize};
+use std::error::Error;
+use tokio::sync::mpsc;
 
-// Trait defining the behavior of a Maple Agent, now using MapleDBError
-#[async_trait]
-pub trait MapleAgent: Send + Sync {
-    // Execute a UAL statement with access to the database, returning MapleDBError on failure
-    async fn execute(&self, stmt: &UALStatement, db: &MapleDB) -> Result<(), MapleDBError>;
+/// Configuration for an agent
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct AgentConfig {
+    pub name: String,
+    pub role: String, // e.g., "logistics", "research"
 }
 
-// Registry to manage multiple agents with database access
-pub struct AgentRegistry {
-    agents: HashMap<String, Box<dyn MapleAgent>>,
-    pub db: MapleDB, // Made public to allow access in EnterpriseNode
+/// Represents a MAPLE agent
+#[derive(Debug)]
+pub struct Agent {
+    config: AgentConfig,
+    message_rx: mpsc::Receiver<UalMessage>,
+    message_tx: mpsc::Sender<UalMessage>,
 }
 
-impl AgentRegistry {
-    // Create a new registry with a shared database instance
-    pub fn new(db: MapleDB) -> Self {
-        AgentRegistry {
-            agents: HashMap::new(),
-            db,
+impl Agent {
+    /// Creates a new agent instance
+    pub fn new(config: AgentConfig) -> Self {
+        let (tx, rx) = mpsc::channel(100);
+        let agent = Agent {
+            config,
+            message_rx: rx,
+            message_tx: tx,
+        };
+        tokio::spawn(agent.run());
+        agent
+    }
+
+    /// Runs the agent's main loop
+    async fn run(self) {
+        let mut rx = self.message_rx;
+        while let Some(msg) = rx.recv().await {
+            match self.process_message(&msg) {
+                Ok(response) => println!("Agent {} processed: {:?}", self.config.name, response),
+                Err(e) => eprintln!("Agent {} error: {}", self.config.name, e),
+            }
         }
     }
 
-    // Register an agents with a unique ID and persist its definition in the database asynchronously
-    pub async fn register(&mut self, id: String, agent: impl MapleAgent + 'static) {
-        self.agents.insert(id.clone(), Box::new(agent));
-        // Await the async define_agent call
-        if let Err(e) = self.db.define_agent(&id, "Generic", "Generic agents").await {
-            eprintln!("Failed to register agents {} in DB: {}", id, e);
+    /// Processes a UAL message
+    fn process_message(&self, msg: &UalMessage) -> Result<String, Box<dyn Error>> {
+        match msg.mode {
+            Mode::Json => {
+                let payload: serde_json::Value = msg.decode()?;
+                Ok(format!(
+                    "Agent {} handled {} with payload: {}",
+                    self.config.name, msg.action, payload
+                ))
+            }
+            Mode::ByteLevel => {
+                // Example: decode custom byte payload
+                let coords = String::from_utf8(msg.payload.clone())?;
+                Ok(format!(
+                    "Agent {} handled byte-level {}: {}",
+                    self.config.name, msg.action, coords
+                ))
+            }
+            Mode::Grpc => unimplemented!("gRPC processing not yet implemented"),
         }
     }
 
-    // Execute a UAL statement using the appropriate agents, converting error to String
-    pub async fn execute(&self, stmt: &UALStatement) -> Result<(), String> {
-        if let Some(agent) = self.agents.get(&stmt.destination) {
-            agent.execute(stmt, &self.db).await.map_err(|e| e.to_string())
-        } else {
-            Err(format!("Agent '{}' not found", stmt.destination))
-        }
-    }
-}
-
-// System Coordinator Agent
-pub struct SystemCoordinator;
-#[async_trait]
-impl MapleAgent for SystemCoordinator {
-    async fn execute(&self, stmt: &UALStatement, db: &MapleDB) -> Result<(), MapleDBError> {
-        println!("SystemCoordinator coordinating task: {:?}", stmt);
-        // Example: Generate sub-tasks
-        let sub_tasks = vec![
-            "EXEC subtask1 agent1".to_string(),
-            "EXEC subtask2 product_manager".to_string(),
-        ];
-        db.log_event(&format!("SystemCoordinator generated sub-tasks: {:?}", sub_tasks)).await?;
+    /// Sends a message to the agent
+    pub async fn send(&self, msg: UalMessage) -> Result<(), Box<dyn Error>> {
+        self.message_tx.send(msg).await?;
         Ok(())
     }
 }
 
-// Software Factory Agents
-pub struct ProductManager;
-#[async_trait]
-impl MapleAgent for ProductManager {
-    async fn execute(&self, stmt: &UALStatement, db: &MapleDB) -> Result<(), MapleDBError> {
-        println!("ProductManager defining product: {:?}", stmt);
-        db.log_event(&format!("ProductManager executed: {:?}", stmt)).await?;
-        Ok(())
-    }
-}
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-pub struct Architect;
-#[async_trait]
-impl MapleAgent for Architect {
-    async fn execute(&self, stmt: &UALStatement, db: &MapleDB) -> Result<(), MapleDBError> {
-        println!("Architect defining requirements: {:?}", stmt);
-        db.log_event(&format!("Architect executed: {:?}", stmt)).await?;
-        Ok(())
-    }
-}
-
-pub struct ProjectManager;
-#[async_trait]
-impl MapleAgent for ProjectManager {
-    async fn execute(&self, stmt: &UALStatement, db: &MapleDB) -> Result<(), MapleDBError> {
-        println!("ProjectManager planning: {:?}", stmt);
-        db.log_event(&format!("ProjectManager executed: {:?}", stmt)).await?;
-        Ok(())
-    }
-}
-
-pub struct SystemEngineer;
-#[async_trait]
-impl MapleAgent for SystemEngineer {
-    async fn execute(&self, stmt: &UALStatement, db: &MapleDB) -> Result<(), MapleDBError> {
-        println!("SystemEngineer managing infra/release: {:?}", stmt);
-        db.log_event(&format!("SystemEngineer executed: {:?}", stmt)).await?;
-        Ok(())
-    }
-}
-
-pub struct AppDeveloper;
-#[async_trait]
-impl MapleAgent for AppDeveloper {
-    async fn execute(&self, stmt: &UALStatement, db: &MapleDB) -> Result<(), MapleDBError> {
-        println!("AppDeveloper developing app: {:?}", stmt);
-        db.log_event(&format!("AppDeveloper executed: {:?}", stmt)).await?;
-        Ok(())
-    }
-}
-
-pub struct QAEngineer;
-#[async_trait]
-impl MapleAgent for QAEngineer {
-    async fn execute(&self, stmt: &UALStatement, db: &MapleDB) -> Result<(), MapleDBError> {
-        println!("QAEngineer testing app: {:?}", stmt);
-        db.log_event(&format!("QAEngineer executed: {:?}", stmt)).await?;
-        Ok(())
-    }
-}
-
-pub struct SimpleAgent;
-#[async_trait]
-impl MapleAgent for SimpleAgent {
-    async fn execute(&self, stmt: &UALStatement, db: &MapleDB) -> Result<(), MapleDBError> {
-        println!("SimpleAgent executing: {:?}", stmt);
-        db.log_event(&format!("SimpleAgent executed: {:?}", stmt)).await?;
-        Ok(())
+    #[tokio::test]
+    async fn test_agent_process() {
+        let config = AgentConfig {
+            name: "test-agent".to_string(),
+            role: "test".to_string(),
+        };
+        let agent = Agent::new(config);
+        let msg = UalMessage::new("move", Mode::Json)
+            .with_json_payload(&serde_json::json!({"x": 10}))
+            .unwrap();
+        agent.send(msg).await.unwrap();
+        tokio::time::sleep(tokio::time::Duration::from_millis(100)).await; // Wait for processing
     }
 }

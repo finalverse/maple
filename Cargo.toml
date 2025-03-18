@@ -16,7 +16,7 @@ members = [
     "runtime",
     "sdk",
     "storage/mapledb",
-    "storage/postgresql",
+    "storage/pg",
     "storage/vectordb",
     "ual",
     "utils",

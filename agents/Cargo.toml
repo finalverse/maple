@@ -1,17 +1,14 @@
 [package]
 name = "maple-agents"
-description = "Maple AI Agent implementations for task execution"
-version.workspace = true
-edition.workspace = true
-authors.workspace = true
-license.workspace = true
-repository.workspace = true
-homepage.workspace = true
+version = "0.1.0"
+edition = "2021"
+description = "Agent implementations for the MAPLE ecosystem"
+authors = ["Finalverse Inc. <maple@finalverse.com>"]
+license = "© 2025 Finalverse Inc. All rights reserved."
+repository = "https://github.com/finalverse/mapleai.git"
+homepage = "https://mapleai.org"
 
 [dependencies]
-tokio = { workspace = true }
-serde = { workspace = true }
 maple-ual = { workspace = true }
-async-trait = "0.1"  # Stable version for async traits
-
-mapledb = { workspace = true }
+serde = { workspace = true }
+tokio = { workspace = true }
