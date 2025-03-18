@@ -1,19 +1,24 @@
 # MAPLE API
 
-REST and gRPC API for the MAPLE ecosystem with access key security.
+Secure RESTful API for the MAPLE ecosystem.
 
 ## Features
-- Secure endpoints with access keys.
-- Differentiates between free and paid users.
+- Access key authentication with JWT.
+- Tier-based restrictions (free vs. paid users).
+- Agent spawning endpoint.
 
 ## Usage
 ```bash
-curl -X POST "http://localhost:8080/agents/register" \
-     -H "Authorization: Bearer your-access-key" \
-     -d '{"name": "logistics-bot", "role": "logistics"}'
+curl -X POST http://localhost:8080/agents/spawn \
+  -H "Authorization: paid-key" \
+  -d @logistics.map
 ```
 
-## Build
+## Configuration
+- Set `API_SECRET_KEY` env var for JWT signing.
+
+## Build and Run
 ```bash
 cargo build --release -p maple-api
+cargo run --release -p maple-api
 ```

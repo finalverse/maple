@@ -1,112 +1,112 @@
-// REST and gRPC API for the MAPLE ecosystem with access key security
+// Secure RESTful API for the MAPLE ecosystem
 // © 2025 Finalverse Inc. All rights reserved.
 
-use maple_agents::AgentConfig;
-use maple_mrs::{Mrs, MrsConfig};
-use maple_map::MapConfig;
+use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, Validation};
+use maple_agents::Agent;
+use maple_runtime::{Runtime, RuntimeConfig, RuntimeMode};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::error::Error;
-use std::sync::Arc;
-use tokio::sync::Mutex;
 use warp::Filter;
 
 /// Configuration for the API
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct ApiConfig {
-    port: u16,
-    access_keys: HashMap<String, UserTier>, // Key -> Tier mapping
+    bind_addr: String, // e.g., "0.0.0.0:8080"
+    secret_key: String, // Secret for JWT signing
 }
 
-/// User tier for access control
-#[derive(Debug, PartialEq)]
-enum UserTier {
-    Free,
-    Paid,
+/// JWT claims for access key authentication
+#[derive(Debug, Serialize, Deserialize)]
+struct Claims {
+    sub: String, // User ID
+    tier: String, // e.g., "free", "paid"
+    exp: usize, // Expiration timestamp
 }
 
-/// API state
-struct ApiState {
-    mrs: Mrs,
-    access_keys: HashMap<String, UserTier>,
+/// API server state
+pub struct ApiServer {
+    runtime: Runtime,
+    keys: HashMap<String, String>, // API key -> Tier (mock DB)
 }
 
-/// Starts the API server
-pub async fn start(config: ApiConfig) -> Result<(), Box<dyn Error>> {
-    let map_config = MapConfig {
-        listen_addr: "/ip4/0.0.0.0/tcp/0".to_string(),
-    };
-    let mrs = Mrs::new(MrsConfig { map_config }).await?;
-    let state = Arc::new(Mutex::new(ApiState {
-        mrs,
-        access_keys: config.access_keys,
-    }));
+impl ApiServer {
+    /// Initializes a new API server
+    pub async fn new(api_config: ApiConfig) -> Result<Self, Box<dyn Error>> {
+        let runtime_config = RuntimeConfig {
+            mode: RuntimeMode::Enterprise, // API runs in enterprise mode
+            map_listen_addr: "/ip4/0.0.0.0/tcp/0".to_string(),
+            db_path: "maple_api_db".to_string(),
+        };
+        let runtime = Runtime::new(runtime_config).await?;
 
-    // Authentication filter
-    let auth = warp::header::<String>("authorization")
-        .and_then(move |auth: String| {
-            let state = state.clone();
-            async move {
-                let key = auth.strip_prefix("Bearer ").ok_or(warp::reject::custom("Invalid token"))?;
-                let state = state.lock().await;
-                if state.access_keys.contains_key(key) {
-                    Ok(key.to_string())
-                } else {
-                    Err(warp::reject::custom("Unauthorized"))
-                }
-            }
-        });
+        // Mock key store (replace with real DB)
+        let mut keys = HashMap::new();
+        keys.insert("free-key".to_string(), "free".to_string());
+        keys.insert("paid-key".to_string(), "paid".to_string());
 
-    // Register agent endpoint
-    let register = warp::path!("agents" / "register")
-        .and(warp::post())
-        .and(auth.clone())
-        .and(warp::body::json())
-        .and(with_state(state.clone()))
-        .and_then(register_agent);
-
-    // Routes
-    let routes = register.with(warp::log("api"));
-    println!("API running on port {}", config.port);
-    warp::serve(routes).run(([127, 0, 0, 1], config.port)).await;
-    Ok(())
-}
-
-fn with_state(state: Arc<Mutex<ApiState>>) -> impl Filter<Extract = (Arc<Mutex<ApiState>>,), Error = std::convert::Infallible> + Clone {
-    warp::any().map(move || state.clone())
-}
-
-async fn register_agent(
-    key: String,
-    body: RegisterRequest,
-    state: Arc<Mutex<ApiState>>,
-) -> Result<impl warp::Reply, warp::Rejection> {
-    let mut state = state.lock().await;
-    let tier = state.access_keys.get(&key).unwrap();
-    if *tier == UserTier::Free && body.role == "premium" {
-        return Err(warp::reject::custom("Free tier cannot use premium roles"));
+        Ok(ApiServer { runtime, keys })
     }
 
-    let config = AgentConfig {
-        name: body.name,
-        role: body.role,
-    };
-    let did = state.mrs.register_agent(config).await.map_err(|e| warp::reject::custom(e.to_string()))?;
-    Ok(warp::reply::json(&RegisterResponse { did }))
-}
+    /// Starts the API server
+    pub async fn start(self, config: ApiConfig) {
+        tracing_subscriber::fmt::init();
 
-#[derive(Debug, Serialize, Deserialize)]
-struct RegisterRequest {
-    name: String,
-    role: String,
-}
+        let auth_filter = warp::any()
+            .and(warp::header::<String>("authorization"))
+            .and_then(move |auth: String| {
+                let server = self.clone();
+                async move {
+                    let token = auth.trim();
+                    let key = server.keys.get(token).ok_or("Invalid API key")?;
+                    let claims = decode::<Claims>(
+                        token,
+                        &DecodingKey::from_secret(config.secret_key.as_ref()),
+                        &Validation::default(),
+                    )
+                        .map_err(|_| "Invalid token")?;
+                    Ok::<(String, String), warp::Rejection>((claims.claims.sub, key.clone()))
+                }
+                    .map_err(warp::reject::custom)
+            });
 
-#[derive(Debug, Serialize)]
-struct RegisterResponse {
-    did: String,
+        let spawn_agent = warp::post()
+            .and(warp::path("agents"))
+            .and(warp::path("spawn"))
+            .and(auth_filter.clone())
+            .and(warp::body::bytes())
+            .and_then(move |(sub, tier), body: bytes::Bytes| {
+                let server = self.clone();
+                async move {
+                    // Limit free tier to basic agents
+                    if tier == "free" && body.len() > 1024 {
+                        return Err(warp::reject::custom("Free tier limited to small agents"));
+                    }
+                    let agent = Agent::from_map_file(&format!("temp_{}.map", sub)).await?;
+                    tokio::fs::write(format!("temp_{}.map", sub), &body).await?;
+                    let did = agent.did.clone();
+                    server.runtime.spawn_agent(did.clone()).await?;
+                    Ok::<warp::reply::Json, warp::Rejection>(warp::reply::json(&serde_json::json!({"did": did})))
+                }
+                    .map_err(warp::reject::custom)
+            });
+
+        let routes = spawn_agent.with(warp::log("maple_api"));
+        warp::serve(routes).run(([0, 0, 0, 0], 8080)).await;
+    }
 }
 
 #[cfg(test)]
 mod tests {
-    // Tests require a running server, omitted for brevity
+    use super::*;
+
+    #[tokio::test]
+    async fn test_api_init() {
+        let config = ApiConfig {
+            bind_addr: "0.0.0.0:8080".to_string(),
+            secret_key: "secret".to_string(),
+        };
+        let server = ApiServer::new(config).await;
+        assert!(server.is_ok());
+    }
 }

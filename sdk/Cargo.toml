@@ -4,16 +4,29 @@ version = "0.1.0"
 edition = "2021"
 description = "Rust SDK for interacting with the MAPLE ecosystem"
 authors = ["Finalverse Inc. <maple@finalverse.com>"]
-license = "© 2025 Finalverse Inc. All rights reserved"
 repository = "https://github.com/finalverse/mapleai.git"
 homepage = "https://mapleai.org"
-publish = true  # Enable publishing to crates.io
+license = "© 2025 Finalverse Inc. All rights reserved"
+keywords = ["maple", "ai", "agents", "decentralized"]
+categories = ["api-bindings", "artificial-intelligence"]
 
 [dependencies]
 maple-agents = { workspace = true }
-maple-ual = { workspace = true }
 maple-map = { workspace = true }
+maple-mrs = { path = "../mrs" }
+maple-ual = { workspace = true }
+mapledb = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 tokio = { workspace = true }
-reqwest = { version = "0.11", features = ["json"] } # For API calls
+reqwest = { version = "0.11", features = ["json"] } # For HTTP requests to API
+thiserror = "1.0" # For custom error types
+
+[features]
+default = []
+python = ["pyo3"] # Enable Python bindings
+
+[dependencies.pyo3]
+version = "0.20"
+features = ["auto-initialize"]
+optional = true

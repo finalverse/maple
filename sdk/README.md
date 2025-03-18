@@ -1,38 +1,44 @@
-# MAPLE SDK (Rust)
+# MAPLE SDK
 
-Rust SDK for interacting with the MAPLE ecosystem.
+Rust and Python SDK for interacting with the MAPLE ecosystem.
 
 ## Features
-- Create and manage agents.
-- Send messages via MAP Protocol.
-- Python SDK available via `pip install maple-sdk` (see below).
+- Create and register agents.
+- Spawn agents via API.
+- Send UAL messages over the network.
+- Publishable as Rust crate and Python pip package.
 
-## Usage
+## Rust Usage
 ```rust
 use maple_sdk::{MapleSdk, SdkConfig};
 
 let config = SdkConfig {
-    api_endpoint: "http://localhost:8080".to_string(),
-    access_key: "your-access-key".to_string(),
+    api_url: "http://localhost:8080".to_string(),
+    api_key: "your-api-key".to_string(),
+    map_listen_addr: "/ip4/0.0.0.0/tcp/0".to_string(),
+    db_path: "maple_sdk_db".to_string(),
 };
 let sdk = MapleSdk::new(config).await.unwrap();
-let agent = sdk.create_agent("logistics-bot", "logistics").await.unwrap();
+let did = sdk.create_agent("logistics-bot", "logistics").await.unwrap();
 ```
 
-## Build
+## Python Usage
+```python
+from maple_sdk import PyMapleSdk
+
+sdk = PyMapleSdk("http://localhost:8080", "your-api-key", "/ip4/0.0.0.0/tcp/0", "maple_sdk_db")
+did = sdk.create_agent("logistics-bot", "logistics")
+print(f"Created agent with DID: {did}")
+```
+
+## Build (Rust)
 ```bash
 cargo build --release -p maple-sdk
+# For Python bindings
+cargo build --release -p maple-sdk --features python
 ```
 
-## Publishing
-```bash
-cargo publish -p maple-sdk
-```
+## Publish
 
-## Python SDK
-Install via pip:
-```bash
-pip install maple-sdk
-```
-See `python/` directory for details (coming soon).
-```
+- Rust: `cargo publish -p maple-sdk`
+- Python: `python setup.py sdist bdist_wheel && twine upload dist/*`
