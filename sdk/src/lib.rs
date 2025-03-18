@@ -1,52 +1,79 @@
-// sdk/src/lib.rs
-// Copyright © 2025 Finalverse Inc. <maple@finalverse.com>
-// Official Website: https://mapleai.org
-// GitHub: https://github.com/finalverse/mapleai.git
+// Rust SDK for interacting with the MAPLE ecosystem
+// © 2025 Finalverse Inc. All rights reserved.
 
-use ual::{UALStatement, parse_ual};
-use agent::{AgentRegistry, MapleAgent};
-use maple_package::MaplePackage;
-use mapledb::MapleDB;
+use maple_agents::{Agent, AgentConfig};
+use maple_map::{MapConfig, MapProtocol};
+use maple_ual::{UalMessage, Mode};
+use serde_json::json;
+use std::error::Error;
+use tokio;
 
-pub struct MapleSDK {
-    agents: AgentRegistry,
-    packages: Vec<MaplePackage>,
+/// Configuration for the SDK
+pub struct SdkConfig {
+    api_endpoint: String, // e.g., "http://localhost:8080"
+    access_key: String,   // For API authentication
 }
 
-impl MapleSDK {
-    pub fn new() -> Self {
-        // Initialize MapleDB for the AgentRegistry
-        let db = MapleDB::new("maple_sdk.db").expect("Failed to initialize DB");
-        MapleSDK {
-            agents: AgentRegistry::new(db), // Provide the required MapleDB instance
-            packages: Vec::new(),
-        }
+/// MAPLE Rust SDK
+pub struct MapleSdk {
+    config: SdkConfig,
+    map: MapProtocol,
+}
+
+impl MapleSdk {
+    /// Initializes a new SDK instance
+    pub async fn new(config: SdkConfig) -> Result<Self, Box<dyn Error>> {
+        let map_config = MapConfig {
+            listen_addr: "/ip4/0.0.0.0/tcp/0".to_string(),
+        };
+        let map = MapProtocol::new(map_config).await?;
+        Ok(MapleSdk { config, map })
     }
 
-    pub fn register_agent(&mut self, id: &str, agent: impl MapleAgent + 'static) {
-        self.agents.register(id.to_string(), agent);
-    }
+    /// Creates and registers a new agent
+    pub async fn create_agent(&self, name: &str, role: &str) -> Result<Agent, Box<dyn Error>> {
+        let agent_config = AgentConfig {
+            name: name.to_string(),
+            role: role.to_string(),
+        };
+        let agent = Agent::new(agent_config.clone());
 
-    pub async fn execute_ual(&self, stmt: UALStatement) -> Result<(), String> {
-        self.agents.execute(&stmt).await
-    }
+        // Optionally register via API (MRS integration example)
+        let client = reqwest::Client::new();
+        let response = client
+            .post(&format!("{}/agents/register", self.config.api_endpoint))
+            .header("Authorization", format!("Bearer {}", self.config.access_key))
+            .json(&json!({ "name": name, "role": role }))
+            .send()
+            .await?;
 
-    // Add a package to the SDK
-    pub fn add_package(&mut self, pkg: MaplePackage) {
-        self.packages.push(pkg);
-    }
-
-    // Execute a named package
-    pub async fn execute_package(&self, name: &str) -> Result<(), String> {
-        if let Some(pkg) = self.packages.iter().find(|p| p.name == name) {
-            for ual_cmd in &pkg.workflow {
-                if let Ok(stmt) = parse_ual(ual_cmd) {
-                    self.execute_ual(stmt).await?;
-                }
-            }
-            Ok(())
+        if response.status().is_success() {
+            Ok(agent)
         } else {
-            Err(format!("Package '{}' not found", name))
+            Err(format!("Failed to register agent: {}", response.status()).into())
         }
+    }
+
+    /// Sends a message to an agent via MAP
+    pub async fn send_message(&self, agent_did: &str, action: &str, payload: serde_json::Value) -> Result<(), Box<dyn Error>> {
+        let msg = UalMessage::new(action, Mode::Json).with_json_payload(&payload)?;
+        self.map.broadcast(format!("{}:{}", agent_did, serde_json::to_string(&msg)?)).await?;
+        Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[tokio::test]
+    async fn test_create_agent() {
+        let config = SdkConfig {
+            api_endpoint: "http://localhost:8080".to_string(),
+            access_key: "test-key".to_string(),
+        };
+        let sdk = MapleSdk::new(config).await.unwrap();
+        let agent = sdk.create_agent("test-agent", "test-role").await;
+        assert!(agent.is_ok());
     }
 }
