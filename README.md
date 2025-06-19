@@ -1,101 +1,79 @@
 # MAPLE: Multi-Agent Protocol Learning Environment
 
-MAPLE is a decentralized, scalable platform for creating, registering, and evolving AI agents. Built with Rust for performance and Python for flexibility, it powers a global ecosystem of self-governing agents via the MAP Protocol, Universal Agent Language (UAL), and Maple Agent Learning Lab (MALL).
+MAPLE is a collection of Rust crates (with optional Python bindings) for building distributed networks of AI agents. Agents communicate through the MAP protocol, exchange structured messages using UAL and can evolve in the Maple Agent Learning Lab (MALL). The project aims to provide a scalable, decentralized platform for autonomous systems.
 
-## Copyright
-© 2025 Finalverse Inc. All rights reserved.
+## Repository Layout
 
-## Contact
-- Email: maple@finalverse.com
-- Website: https://mapleai.org
-- GitHub: https://github.com/finalverse/mapleai.git
+- `agents/` – Core agent implementation and utilities for handling `.map` DNA files.
+- `api/` – REST API with JWT authentication for spawning and managing agents.
+- `cli/` – Command line interface built with `clap`.
+- `core/` – Governance logic and language model integration.
+- `map/` – P2P communication layer using `libp2p`.
+- `mall/` – Agent learning lab with optional Python agents.
+- `mrs/` – Registry Service for DIDs and agent metadata.
+- `runtime/` – Node runtime supporting distributed or enterprise modes.
+- `sdk/` – Rust/Python SDK for developers.
+- `storage/` – MapleDB, PostgreSQL and vector DB crates.
+- `ual/` – Universal Agent Language message format.
 
-## High-Level Components
-- **core/**: Governance and Maple Core LLM/AGI.
-- **map/**: P2P messaging protocol (MAP).
-- **mrs/**: Registry for agent DIDs and "DNA."
-- **ual/**: Multi-mode communication language (JSON, gRPC, byte-level).
-- **mall/**: Learning environment for agent evolution.
-- **agents/**: Pre-built and custom agent implementations.
-- **storage/**: Data backends (MapleDB, PostgreSQL, VectorDB).
-- **sdk/**: Tools for developers to build agents.
-- **api/**: External REST/gRPC interfaces.
-- **runtime/**: Distributed and enterprise node runtime.
-- **cli/**: Command-line interface for MAPLE.
+See `docs/architecture.md` for a detailed overview of how these pieces connect.
 
-## Getting Started
-1. Clone the repo: `git clone https://github.com/finalverse/maple.git`
-2. Build: `cargo build --release`
-3. Run CLI: `cargo run --bin maple -- --help`
+## Quick Start
 
-## Sample Usage Scenarios
-
-### For Developers
-#### 1. Create and Register a Custom Agent
 ```bash
-# Define agents "DNA" (config + LLM weights)
-maple agents create --name "logistics-bot" --config logistics.json --llm mistral-7b
+# build the entire workspace
+cargo build --release
 
-# Register with MRS
-maple mrs register --agents "logistics-bot" --output did:maple:agents:1234
+# run the CLI
+cargo run --bin maple -- --help
 ```
-Build a logistics optimization agent, register it globally, and share it with the Mapleverse.
 
-#### 2. Train an Agent in the Learning Lab
+### Spawning an Agent
+
 ```bash
-# Start MALL sandbox
-maple mall start --task "supply-chain-optimization"
+# create an agent and dump its DNA
+maple agent create --name "logistics-bot" --role "logistics"
 
-# Train agents
-maple mall train --agents "logistics-bot" --iterations 1000
+# register with the registry service
+maple mrs register --name "logistics-bot"
+
+# start a local runtime and spawn the agent
+maple runtime start --mode distributed --nodes 1
+maple runtime spawn --did "did:maple:agent:1234"
 ```
-Evolve your agent’s capabilities in a simulated environment, then publish updates via MRS.
 
-### For Businesses
-#### 3. Deploy a Distributed Supply Chain Network
-```bash
-# Launch distributed runtime
-maple runtime start --mode distributed --nodes 10
+### Using the SDK
 
-# Spawn registered agents
-maple runtime spawn --did did:maple:agents:1234 --count 5
-```
-Run a decentralized network of logistics agents to streamline supply chain operations.
-
-#### 4. Integrate with Enterprise Systems
-```bash
-# Start enterprise runtime
-maple runtime start --mode enterprise --config enterprise.toml
-
-# Query via API
-curl -X GET "http://localhost:8080/agents/status" -H "Authorization: Bearer token"
-```
-Monitor and manage agents via REST API in a secure enterprise setup.
-
-### For Researchers
-#### 5. Experiment with UAL Communication
 ```rust
-use maple::ual::{Message, Mode};
+use maple_sdk::{MapleSdk, SdkConfig};
 
-let msg = Message::new("move", Mode::Json)
-    .with_payload(r#"{"x": 10, "y": 20}"#);
-agent.send(msg);
+let config = SdkConfig {
+    api_url: "http://localhost:8080".to_string(),
+    api_key: "test-key".to_string(),
+    map_listen_addr: "/ip4/0.0.0.0/tcp/0".to_string(),
+    db_path: "maple_sdk_db".to_string(),
+};
+let sdk = MapleSdk::new(config).await.unwrap();
+let did = sdk.create_agent("logistics-bot", "logistics").await.unwrap();
 ```
-Test agent communication in JSON mode, then switch to byte-level for optimization.
 
-## Why MAPLE?
-- **Decentralized:** No central authority—agents self-govern via MAP and MRS.
-- **Scalable:** From edge devices to enterprise clusters.
-- **Evolving:** Agents learn and adapt in MALL.
-- **Developer-Friendly:** SDK and CLI accelerate adoption.
+## Documentation
+
+Additional documents can be found in the `docs/` directory:
+
+- `architecture.md` – overview of the system design.
+- `MAP.md` – details of the MAP peer-to-peer protocol.
+- `AUL.md` – specification of the Universal Agent Language.
+- `TODO.md` – planned improvements.
 
 ## Contributing
-Fork, branch, and submit PRs! Join our Discord for discussions.
+
+Pull requests are welcome! Feel free to open issues or propose new agents and integrations.
 
 ## Contact
-- **Email:** maple@finalverse.com
-- **Website:** https://mapleai.org
-- **GitHub:** https://github.com/finalverse/mapleai.git
 
-## License
+- Email: [maple@finalverse.com](mailto:maple@finalverse.com)
+- Website: <https://mapleai.org>
+- GitHub: <https://github.com/finalverse/mapleai.git>
+
 © 2025 Finalverse Inc. All rights reserved.
